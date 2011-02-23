@@ -10,7 +10,7 @@ class Graylog2Exceptions
       :hostname => "localhost",
       :port => 12201,
       :local_app_name => Socket::gethostname,
-      :facility => 'gelf_exceptions',
+      :facility => 'graylog2_exceptions',
       :max_chunk_size => 'LAN',
       :level => 3
     }
