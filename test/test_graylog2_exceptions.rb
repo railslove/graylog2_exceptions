@@ -41,7 +41,7 @@ class TestGraylog2Exceptions < Test::Unit::TestCase
 
     assert json["short_message"].include?('undefined method `klopfer!')
     assert json["full_message"].include?('in `build_exception')
-    assert_equal 'gelf_exceptions', json["facility"]
+    assert_equal 'graylog2_exceptions', json["facility"]
     assert_equal 4, json["level"]
     assert_equal Socket.gethostname, json["host"]
     assert_equal ex.backtrace[0].split(":")[1], json["line"]
