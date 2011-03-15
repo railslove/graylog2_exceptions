@@ -23,6 +23,13 @@ class TestGraylog2Exceptions < Test::Unit::TestCase
     assert_equal 1, c.args[:level]
   end
   
+  def test_add_custom_attributes_to_parameters
+    c = Graylog2Exceptions.new(nil, {:_app => "my_awesome_app", :_rails_env => "staging"})
+    
+		assert_equal "my_awesome_app", c.args[:_app]
+		assert_equal "staging", c.args[:_rails_env]
+  end
+
   def test_correct_parameters_when_not_custom_set
     c = Graylog2Exceptions.new(nil, {})
     
@@ -62,6 +69,27 @@ class TestGraylog2Exceptions < Test::Unit::TestCase
     assert_equal "machinexx", json["host"]
     assert_equal ex.backtrace[0].split(":")[1], json["line"]
     assert_equal ex.backtrace[0].split(":")[0], json["file"]
+  end
+
+  def test_send_exception_to_graylog2_with_custom_attributes
+    ex = build_exception
+
+    c = Graylog2Exceptions.new(nil, {
+			:local_app_name => "machinexx", :level => 4, :facility => 'myfacility',
+			:_app => "my_awesome_app", :_rails_env => "staging"
+		})
+    sent = Zlib::Inflate.inflate(c.send_to_graylog2(ex).join)
+    json = JSON.parse(sent)
+
+    assert json["short_message"].include?('undefined method `klopfer!')
+    assert json["full_message"].include?('in `build_exception')
+    assert_equal 'myfacility', json["facility"]
+    assert_equal 3, json["level"]
+    assert_equal "machinexx", json["host"]
+    assert_equal ex.backtrace[0].split(":")[1], json["line"]
+    assert_equal ex.backtrace[0].split(":")[0], json["file"]
+    assert_equal 'my_awesome_app', json["_app"]
+    assert_equal 'staging', json["_rails_env"]
   end
 
   def test_invalid_port_detection
